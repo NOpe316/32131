@@ -1,9 +1,14 @@
+import os
 import telebot
 from telebot import types
 import sqlite3
-from config import API_TOKEN
+
+# Получаем токен API из переменной окружения
+API_TOKEN = os.getenv("API_TOKEN")
 
 bot = telebot.TeleBot(token=API_TOKEN)
+
+user_id = 6448857134
 
 # Используем контекстный менеджер для работы с базой данных
 def get_connection():
@@ -41,10 +46,6 @@ def send_to_admin(message, user_id, username):
     admin_chat_id = 6448857134 # Замените на ваш ID чата с админом
     user_message = message.text
 
-    # Отправляем сообщение админу
-    admin_message = f"Сообщение от @{username} (ID: {user_id}):\n\n{user_message}"
-    bot.send_message(admin_chat_id, admin_message)
-
     # Отправляем пользователю подтверждение об отправке сообщения
     bot.send_message(message.chat.id, "Сообщение отправлено")
 
@@ -64,8 +65,10 @@ def handle_reply(call):
     bot.register_next_step_handler(msg, send_reply, user_id)
 
 def send_reply(message, user_id):
-    # Отправляем введенный пользователем текст пользователю с заданным идентификатором
+    # Отправляем введенный пользователем текст
     bot.send_message(user_id, message.text)
+    # Сообщаем пользователю, что ответил администратор
+    bot.send_message(user_id, "Вам ответил администратор.")
     # Отправляем сообщение админу о том, что ответ был отправлен
     bot.send_message(6448857134, "Ответ был отправлен.")
 
@@ -88,6 +91,7 @@ def handle_admin_panel(message):
         bot.send_message(chat_id, admin_message, reply_markup=markup)
     else:
         bot.send_message(chat_id, "Извините, у вас нет доступа к админ-панели.")
+
 
 
 # Обработчик кнопки "Рассылка"
@@ -126,4 +130,8 @@ def handle_user_stats(message):
     # Отправляем статистику пользователей пользователю
     bot.send_message(message.chat.id, user_stats)
 
-bot.polling(none_stop=True)
+# Убираем keep.alive() и bot.polling(none_stop=True), чтобы код работал на всех возможных серверах
+
+if __name__ == "__main__":
+    bot.polling()
+
