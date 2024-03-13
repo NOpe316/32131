@@ -2,9 +2,7 @@ import os
 import telebot
 from telebot import types
 import sqlite3
-
-# Получаем токен API из переменной окружения
-API_TOKEN = os.getenv("API_TOKEN")
+from config import API_TOKEN
 
 bot = telebot.TeleBot(token=API_TOKEN)
 
